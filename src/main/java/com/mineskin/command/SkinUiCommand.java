@@ -13,9 +13,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * {@code /skinui [关键词]}、{@code /skinui page <页码> [关键词]}、{@code /skinui reload}
+ * {@code /skins [关键词]}、{@code /skins page <页码> [关键词]}、{@code /skins reload}
  * <p>
- * mod 客户端打开 3D 浏览器；原版客户端退回聊天列表（点击换肤/翻页）。
+ * 服务器唯一皮肤入口（SkinsRestorer 自带 /skins GUI 已禁用）：
+ * mod 客户端打开 MineUI 3D 浏览器；原版客户端退回聊天列表（点击换肤/翻页）。
  */
 public final class SkinUiCommand {
 
@@ -26,7 +27,7 @@ public final class SkinUiCommand {
     }
 
     public void register(Commands commands) {
-        LiteralCommandNode<CommandSourceStack> node = Commands.literal("skinui")
+        LiteralCommandNode<CommandSourceStack> node = Commands.literal("skins")
                 .requires(source -> source.getSender().hasPermission("mineskin.use"))
                 .executes(context -> {
                     open(context.getSource().getSender(), "", 1);
@@ -63,7 +64,7 @@ public final class SkinUiCommand {
                         }))
                 .build();
 
-        commands.register(node, "MineSkin 皮肤浏览器");
+        commands.register(node, "MineSkin 皮肤浏览器（/skins）");
     }
 
     private void open(CommandSender sender, String filter, int page) {

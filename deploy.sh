@@ -27,11 +27,12 @@ echo "==> 构建 MineSkin"
 (cd "$ROOT" && ./gradlew build -q)
 MINESKIN_JAR=$(ls -t "$ROOT"/build/libs/MineSkin-*.jar | head -n1)
 
-# 3) 部署服务端文件（皮肤目录/配置/Skript 脚本 + 插件 jar）
-mkdir -p "$SERVER/plugins/SkinsRestorer/skins" "$SERVER/plugins/Skript/scripts"
+# 3) 部署服务端文件（皮肤目录/配置 + 插件 jar）
+mkdir -p "$SERVER/plugins/SkinsRestorer/skins"
 cp "$ROOT/config/config.yml" "$SERVER/plugins/SkinsRestorer/config.yml"
 cp "$ROOT"/skins/*.customskin "$SERVER/plugins/SkinsRestorer/skins/"
-cp "$ROOT/scripts/skinfind.sk" "$SERVER/plugins/Skript/scripts/skinfind.sk"
+# 清理旧版 Skript 搜索脚本（/skins 已由 MineSkin 接管）
+rm -f "$SERVER/plugins/Skript/scripts/skinfind.sk"
 
 rm -f "$SERVER/plugins/"MineSkin-*.jar
 cp "$MINESKIN_JAR" "$SERVER/plugins/"
@@ -46,10 +47,10 @@ echo "  $SERVER/plugins/$(basename "$MINESKIN_JAR")"
 if [ -n "$MINEUI_JAR" ]; then
     echo "  $SERVER/plugins/$(basename "$MINEUI_JAR")"
 fi
-echo "  $SERVER/plugins/SkinsRestorer/config.yml"
+echo "  $SERVER/plugins/SkinsRestorer/config.yml（已禁用 SR 自带 /skins GUI）"
 echo "  $SERVER/plugins/SkinsRestorer/skins/  ($(ls "$ROOT"/skins/*.customskin | wc -l) 个皮肤)"
-echo "  $SERVER/plugins/Skript/scripts/skinfind.sk"
 echo
-echo "注意：玩家客户端需更新 MineUI mod（含 skin/browser 页面与任意皮肤 3D 预览）："
+echo "注意：玩家客户端需更新 MineUI mod（0.6.6+，支持服务端下发界面定义与任意皮肤 3D 预览；"
+echo "      页面本身随本插件 jar 发布，改界面不用重发 mod）："
 echo "  $MINEUI_DIR/tools/build_client_kit.sh"
-echo "重启服务器后生效；/skinui 打开皮肤浏览器，旧版客户端会自动退回聊天列表。"
+echo "重启服务器后生效；/skins 打开皮肤界面（mod 客户端 3D 预览，原版客户端聊天列表）。"

@@ -1,5 +1,7 @@
 package com.mineskin;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mineskin.command.SkinUiCommand;
 import com.mineskin.ui.UiAdapter;
 import com.mineskin.ui.UiHandle;
@@ -12,6 +14,8 @@ import net.skinsrestorer.api.property.SkinProperty;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,15 +31,22 @@ public final class MineSkinPlugin extends JavaPlugin {
     /** 与 SkinsRestorer config.yml 的换肤冷却保持一致。 */
     public static final long APPLY_COOLDOWN_MILLIS = 5000L;
 
+    /** 皮肤浏览器界面定义（随本插件 jar 发布，由 MineUI 在 OPEN 时下发给客户端渲染）。 */
+    private static final String BROWSER_UI_RESOURCE = "assets/mineskin/ui/skin/browser.json";
+    /** OPEN 包上限 32 KiB，留出状态余量。 */
+    private static final int MAX_UI_BYTES = 24 * 1024;
+
     private final Map<UUID, Long> lastApply = new ConcurrentHashMap<>();
 
     private SkinCatalog catalog;
     private UiAdapter ui;
+    private JsonObject browserUi;
 
     @Override
     public void onEnable() {
         catalog = new SkinCatalog(this);
         catalog.reload();
+        loadBrowserUi();
         hookMineUi();
 
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
@@ -43,6 +54,29 @@ public final class MineSkinPlugin extends JavaPlugin {
 
         getLogger().info("MineSkin 已启用（MineUI 3D 预览："
                 + (ui != null && ui.available() ? "可用" : "不可用，将使用聊天列表") + "）");
+    }
+
+    /** 加载皮肤浏览器页面（业务页面归本插件维护，MineUI 只负责渲染）。 */
+    private void loadBrowserUi() {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(BROWSER_UI_RESOURCE)) {
+            if (in == null) {
+                getLogger().warning("缺少界面定义资源: " + BROWSER_UI_RESOURCE);
+                return;
+            }
+            byte[] bytes = in.readAllBytes();
+            if (bytes.length > MAX_UI_BYTES) {
+                getLogger().warning("界面定义过大（" + bytes.length + " 字节，建议 < " + MAX_UI_BYTES
+                        + "），OPEN 包可能超过协议上限");
+            }
+            browserUi = JsonParser.parseString(new String(bytes, StandardCharsets.UTF_8)).getAsJsonObject();
+        } catch (Exception e) {
+            getLogger().warning("界面定义加载失败: " + BROWSER_UI_RESOURCE + " (" + e.getMessage() + ")");
+        }
+    }
+
+    /** 皮肤浏览器界面定义；null 表示资源缺失（此时退回聊天列表）。 */
+    public JsonObject browserUi() {
+        return browserUi;
     }
 
     /**
@@ -74,10 +108,13 @@ public final class MineSkinPlugin extends JavaPlugin {
         catalog.reload();
     }
 
-    /** 打开浏览器（mod 客户端）或发送聊天列表（原版客户端）。 */
+    /**
+     * 打开浏览器（支持 server_ui 的 mod 客户端）或发送聊天列表。
+     * 原版客户端、旧版 mod 均回退聊天列表，避免开出无法渲染的页面。
+     */
     public void openBrowser(Player player, String filter, int page) {
-        if (ui != null && ui.available() && ui.hasClient(player)) {
-            UiHandle handle = ui.open(player, "skin", "browser");
+        if (ui != null && ui.available() && browserUi != null && ui.supportsServerUi(player)) {
+            UiHandle handle = ui.open(player, "skin", "browser", browserUi);
             new SkinBrowser(this, handle, player, filter).start(page);
         } else {
             ChatSkinList.send(this, player, filter, page);
@@ -108,5 +145,15 @@ public final class MineSkinPlugin extends JavaPlugin {
                 .setSkinIdOfPlayer(player.getUniqueId(), SkinIdentifier.ofCustom(entry.id()));
         SkinApplier<Player> applier = skinsRestorer.getSkinApplier(Player.class);
         applier.applySkin(player, SkinProperty.of(entry.value(), entry.signature()));
+    }
+
+    /** 清除皮肤：删除存储并应用默认外观（与 SR 的 /skin clear 一致）。 */
+    public void clearSkin(Player player) throws net.skinsrestorer.api.exception.DataRequestException {
+        SkinsRestorer skinsRestorer = SkinsRestorerProvider.get();
+        if (skinsRestorer == null) {
+            throw new IllegalStateException("SkinsRestorer 未就绪");
+        }
+        skinsRestorer.getPlayerStorage().removeSkinIdOfPlayer(player.getUniqueId());
+        skinsRestorer.getSkinApplier(Player.class).applySkin(player);
     }
 }

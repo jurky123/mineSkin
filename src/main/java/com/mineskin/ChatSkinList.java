@@ -50,11 +50,11 @@ public final class ChatSkinList {
             nav = nav.append(Component.text("  ")).append(pageButton("下一页", page + 2, filter));
         }
         player.sendMessage(nav);
-        player.sendMessage(Component.text("提示：安装 MineUI 客户端可使用 3D 预览界面（/skinui）", NamedTextColor.DARK_GRAY));
+        player.sendMessage(Component.text("提示：安装/更新 MineUI 客户端 mod（0.6.4+）可使用 3D 预览界面", NamedTextColor.DARK_GRAY));
     }
 
     private static Component pageButton(String label, int page, String filter) {
-        String command = "/skinui page " + page + (filter.isBlank() ? "" : " " + filter);
+        String command = "/skins page " + page + (filter.isBlank() ? "" : " " + filter);
         return Component.text("[" + label + "]", NamedTextColor.AQUA)
                 .clickEvent(ClickEvent.runCommand(command));
     }

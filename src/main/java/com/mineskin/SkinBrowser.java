@@ -10,7 +10,10 @@ import java.util.Map;
 /**
  * 一次皮肤浏览器会话：左侧分页列表 + 右侧 3D 预览，动作全部回服务端校验。
  * <p>
- * 与客户端 {@code assets/mineui/ui/skin/browser.json} 的槽位数量保持一致（{@value #PAGE_SIZE}）。
+ * 交互：悬停条目即时预览；点击选中（再次点击取消），选中后锁定预览、悬浮不再切换；
+ * 「应用该皮肤」应用当前预览的那一款（未选中时即最近悬停的）。
+ * <p>
+ * 与客户端页面 {@code assets/mineskin/ui/skin/browser.json} 的槽位数量保持一致（{@value #PAGE_SIZE}）。
  */
 public final class SkinBrowser {
 
@@ -20,11 +23,14 @@ public final class SkinBrowser {
     private final MineSkinPlugin plugin;
     private final UiHandle ui;
     private final Player player;
-    private final String filter;
+    private String filter;
 
     private List<SkinEntry> results;
     private int page;
+    /** 点击选中的条目（锁定预览）；-1 表示未选中。 */
     private int selected = -1;
+    /** 最近悬停的条目；-1 表示无。 */
+    private int hovered = -1;
 
     public SkinBrowser(MineSkinPlugin plugin, UiHandle ui, Player player, String filter) {
         this.plugin = plugin;
@@ -37,29 +43,29 @@ public final class SkinBrowser {
         results = plugin.catalog().search(filter);
         int pages = pageCount();
         page = Math.max(0, Math.min(requestedPage - 1, pages - 1));
-        selected = results.isEmpty() ? -1 : page * PAGE_SIZE;
 
         ui.state("title", "皮肤浏览器");
-        ui.state("subtitle", results.isEmpty()
-                ? "没有匹配的皮肤"
-                : "共 " + results.size() + " 款" + (filter.isEmpty() ? "" : " · 关键词：" + filter));
-        ui.state("footer", "数据：" + plugin.catalog().size() + " 款 SkinsRestorer 自定义皮肤");
 
         for (int i = 0; i < PAGE_SIZE; i++) {
             final int slot = i;
-            ui.on("slot_" + i, action -> select(page * PAGE_SIZE + slot));
+            ui.on("slot_" + i, action -> toggleSelect(page * PAGE_SIZE + slot));
+            ui.on("hover_" + i, action -> hover(page * PAGE_SIZE + slot));
         }
         ui.on("prev", action -> turn(-1));
         ui.on("next", action -> turn(1));
-        ui.on("apply", action -> applySelected());
+        ui.on("apply", action -> applyPreviewed());
+        ui.on("clear", action -> clearSkin());
         ui.on("close", action -> ui.close());
+        // 搜索栏（需要 MineUI input 控件支持；回车提交 payload.text）
+        ui.on("search", action -> applySearch(action.getString("text", "")));
 
+        pushSubtitle();
         pushSlots();
         pushPreview();
         pushPageLabel();
         pushStatus(results.isEmpty()
-                ? "试试 /skinui <英文关键词>（如 fox、girl、creeper）"
-                : "点击左侧皮肤，右侧拖动可旋转 3D 预览");
+                ? "试试 /skins <英文关键词>（如 fox、girl、creeper）"
+                : "悬停条目即时预览 · 点击选中后锁定预览 · 再点取消");
         ui.snapshot();
 
         player.sendMessage(net.kyori.adventure.text.Component.text(
@@ -69,14 +75,29 @@ public final class SkinBrowser {
 
     // ---------- 动作 ----------
 
-    private void select(int index) {
+    /** 鼠标悬停：未选中时即时预览该条目。 */
+    private void hover(int index) {
+        if (selected >= 0 || index < 0 || index >= results.size() || hovered == index) {
+            return;
+        }
+        hovered = index;
+        pushPreview();
+    }
+
+    /** 点击条目：选中/取消选中（选中后锁定预览，悬浮不再切换）。 */
+    private void toggleSelect(int index) {
         if (index < 0 || index >= results.size()) {
             return;
         }
-        selected = index;
+        if (selected == index) {
+            selected = -1;
+            pushStatus("已取消选择，恢复悬停预览");
+        } else {
+            selected = index;
+            pushStatus("已选择：" + results.get(index).display() + " · 点「应用该皮肤」生效（再次点击取消）");
+        }
         pushSlots();
         pushPreview();
-        pushStatus("已选择：" + results.get(index).display() + " · 点「应用该皮肤」生效");
     }
 
     private void turn(int delta) {
@@ -86,18 +107,16 @@ public final class SkinBrowser {
             return;
         }
         page = next;
-        int first = page * PAGE_SIZE;
-        if (selected < first || selected >= Math.min(first + PAGE_SIZE, results.size())) {
-            selected = results.isEmpty() ? -1 : first;
-        }
+        hovered = -1;
         pushSlots();
         pushPreview();
         pushPageLabel();
     }
 
-    private void applySelected() {
-        if (selected < 0 || selected >= results.size()) {
-            pushStatus("请先点击左侧列表选择一款皮肤");
+    private void applyPreviewed() {
+        int index = previewIndex();
+        if (index < 0 || index >= results.size()) {
+            pushStatus("请先悬停或点击选择一款皮肤");
             return;
         }
         long remaining = plugin.applyCooldownRemainingMillis(player);
@@ -106,7 +125,7 @@ public final class SkinBrowser {
                     "换肤冷却中：还需 %.1f 秒", remaining / 1000.0));
             return;
         }
-        SkinEntry entry = results.get(selected);
+        SkinEntry entry = results.get(index);
         try {
             plugin.applySkin(player, entry);
             plugin.markApplied(player);
@@ -117,7 +136,40 @@ public final class SkinBrowser {
         }
     }
 
+    /** 清除当前皮肤，恢复默认外观。 */
+    private void clearSkin() {
+        long remaining = plugin.applyCooldownRemainingMillis(player);
+        if (remaining > 0) {
+            pushStatus(String.format(java.util.Locale.ROOT,
+                    "换肤冷却中：还需 %.1f 秒", remaining / 1000.0));
+            return;
+        }
+        try {
+            plugin.clearSkin(player);
+            plugin.markApplied(player);
+            selected = -1;
+            hovered = -1;
+            pushSlots();
+            pushPreview();
+            pushStatus("已清除皮肤，恢复默认外观");
+        } catch (Exception e) {
+            plugin.getLogger().warning("为 " + player.getName() + " 清除皮肤失败: " + e.getMessage());
+            pushStatus("清除失败：" + e.getMessage());
+        }
+    }
+
     // ---------- 状态下发 ----------
+
+    /** 当前预览展示的条目：选中锁定 > 最近悬停 > 本页第一项。 */
+    private int previewIndex() {
+        if (selected >= 0) {
+            return selected;
+        }
+        if (hovered >= 0) {
+            return hovered;
+        }
+        return page * PAGE_SIZE;
+    }
 
     private void pushSlots() {
         Map<String, Object> slots = new LinkedHashMap<>();
@@ -141,8 +193,9 @@ public final class SkinBrowser {
 
     private void pushPreview() {
         Map<String, Object> preview = new LinkedHashMap<>();
-        if (selected >= 0 && selected < results.size()) {
-            SkinEntry entry = results.get(selected);
+        int index = previewIndex();
+        if (index >= 0 && index < results.size()) {
+            SkinEntry entry = results.get(index);
             preview.put("name", entry.display());
             preview.put("value", entry.value());
             preview.put("signature", entry.signature());
@@ -152,6 +205,28 @@ public final class SkinBrowser {
             preview.put("signature", "");
         }
         ui.state("preview", preview);
+    }
+
+    /** 搜索栏提交：重新过滤并回到第一页（等 MineUI input 能力到位后自动生效）。 */
+    private void applySearch(String keyword) {
+        filter = keyword == null ? "" : keyword.trim();
+        results = plugin.catalog().search(filter);
+        page = 0;
+        selected = -1;
+        hovered = -1;
+        pushSubtitle();
+        pushSlots();
+        pushPreview();
+        pushPageLabel();
+        pushStatus(results.isEmpty()
+                ? "没有匹配「" + filter + "」的皮肤"
+                : "找到 " + results.size() + " 款皮肤");
+    }
+
+    private void pushSubtitle() {
+        ui.state("subtitle", results.isEmpty()
+                ? "没有匹配的皮肤"
+                : "共 " + results.size() + " 款" + (filter.isEmpty() ? "" : " · 关键词：" + filter));
     }
 
     private void pushPageLabel() {

@@ -8,8 +8,8 @@ depend: [SkinsRestorer]
 softdepend: [MineUI]
 permissions:
   mineskin.use:
-    description: 允许使用 /skinui 浏览与换肤
+    description: 允许使用 /skins 浏览与换肤
     default: true
   mineskin.admin:
-    description: 允许 /skinui reload
+    description: 允许 /skins reload
     default: op

@@ -1,0 +1,517 @@
+{
+  "type": "column",
+  "id": "root",
+  "width": "100%",
+  "height": "100%",
+  "padding": 12,
+  "gap": 8,
+  "background": "#0B1018",
+  "children": [
+    {
+      "type": "row",
+      "id": "header",
+      "width": "100%",
+      "height": 26,
+      "align": "center",
+      "gap": 8,
+      "children": [
+        {
+          "type": "row",
+          "width": "25%",
+          "gap": 8,
+          "align": "center",
+          "children": [
+            {
+              "type": "text",
+              "text": "{state.title}",
+              "color": "#FFFFFF",
+              "scale": 1.4
+            }
+          ]
+        },
+        {
+          "type": "input",
+          "id": "search",
+          "width": "55%",
+          "height": 22,
+          "placeholder": "搜索皮肤（回车）",
+          "maxLength": 32,
+          "action": "search",
+          "background": "#16202C",
+          "radius": 6,
+          "border": {
+            "color": "#26384A",
+            "width": 1
+          },
+          "color": "#E0E8F0",
+          "placeholderColor": "#607080"
+        },
+        {
+          "type": "row",
+          "width": "40%",
+          "justify": "end",
+          "align": "center",
+          "children": [
+            {
+              "type": "button",
+              "text": "关闭",
+              "action": "close",
+              "height": 22,
+              "radius": 6,
+              "background": "#8A3E5A",
+              "hoverBackground": "#D05F8A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "id": "meta",
+      "width": "100%",
+      "height": 12,
+      "align": "center",
+      "justify": "space-between",
+      "children": [
+        {
+          "type": "text",
+          "text": "{state.subtitle}",
+          "color": "#8090A0"
+        },
+        {
+          "type": "text",
+          "text": "悬停预览 · 点击锁定/取消 · 回车搜索",
+          "color": "#607080"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "id": "body",
+      "width": "100%",
+      "height": "100%",
+      "gap": 10,
+      "children": [
+        {
+          "type": "column",
+          "id": "listColumn",
+          "width": "57%",
+          "height": "100%",
+          "gap": 6,
+          "children": [
+            {
+              "type": "scroll",
+              "id": "list",
+              "width": "100%",
+              "height": "80%",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "row",
+                  "action": "slot_0",
+                  "hoverAction": "hover_0",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.0.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.0.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.0.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.0.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_1",
+                  "hoverAction": "hover_1",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.1.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.1.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.1.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.1.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_2",
+                  "hoverAction": "hover_2",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.2.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.2.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.2.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.2.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_3",
+                  "hoverAction": "hover_3",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.3.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.3.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.3.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.3.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_4",
+                  "hoverAction": "hover_4",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.4.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.4.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.4.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.4.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_5",
+                  "hoverAction": "hover_5",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.5.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.5.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.5.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.5.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_6",
+                  "hoverAction": "hover_6",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.6.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.6.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.6.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.6.selected}"
+                    }
+                  ]
+                },
+                {
+                  "type": "row",
+                  "action": "slot_7",
+                  "hoverAction": "hover_7",
+                  "width": "100%",
+                  "height": 26,
+                  "padding": {
+                    "left": 6,
+                    "right": 6
+                  },
+                  "gap": 6,
+                  "align": "center",
+                  "background": "#16202C",
+                  "radius": 6,
+                  "tooltip": "{state.slots.7.tooltip}",
+                  "children": [
+                    {
+                      "type": "box",
+                      "width": 5,
+                      "height": 16,
+                      "radius": 2,
+                      "background": "#3FA9F5",
+                      "visible": "{state.slots.7.selected}"
+                    },
+                    {
+                      "type": "text",
+                      "text": "{state.slots.7.name}",
+                      "color": "#E0E8F0"
+                    },
+                    {
+                      "type": "text",
+                      "text": "已选",
+                      "color": "#3FA9F5",
+                      "visible": "{state.slots.7.selected}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "row",
+              "id": "pager",
+              "width": "100%",
+              "height": 22,
+              "align": "center",
+              "justify": "space-between",
+              "children": [
+                {
+                  "type": "button",
+                  "text": "上一页",
+                  "action": "prev",
+                  "height": 20,
+                  "radius": 6,
+                  "background": "#2E5C8A",
+                  "hoverBackground": "#3FA9F5"
+                },
+                {
+                  "type": "text",
+                  "text": "{state.page}",
+                  "color": "#B0C0D0"
+                },
+                {
+                  "type": "button",
+                  "text": "下一页",
+                  "action": "next",
+                  "height": 20,
+                  "radius": 6,
+                  "background": "#2E5C8A",
+                  "hoverBackground": "#3FA9F5"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "scroll",
+          "id": "previewPanel",
+          "width": "40%",
+          "height": "100%",
+          "padding": 10,
+          "gap": 6,
+          "background": "#10161F",
+          "radius": 8,
+          "border": {
+            "color": "#26384A",
+            "width": 1
+          },
+          "children": [
+            {
+              "type": "column",
+              "width": "100%",
+              "gap": 6,
+              "align": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "3D 预览",
+                  "color": "#3FA9F5"
+                },
+                {
+                  "type": "player",
+                  "id": "preview",
+                  "width": "100%",
+                  "height": "55%",
+                  "scale": 55,
+                  "followMouse": true,
+                  "skin": {
+                    "value": "{state.preview.value}",
+                    "signature": "{state.preview.signature}"
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "{state.preview.name}",
+                  "color": "#FFFFFF",
+                  "scale": 1.2
+                },
+                {
+                  "type": "button",
+                  "text": "应用该皮肤",
+                  "action": "apply",
+                  "width": 130,
+                  "height": 22,
+                  "radius": 6,
+                  "background": "#2E7C5A",
+                  "hoverBackground": "#3FBF8A"
+                },
+                {
+                  "type": "button",
+                  "text": "清除皮肤",
+                  "action": "clear",
+                  "width": 130,
+                  "height": 20,
+                  "radius": 6,
+                  "background": "#5A3E4A",
+                  "hoverBackground": "#A05F6A"
+                },
+                {
+                  "type": "text",
+                  "text": "{state.status}",
+                  "color": "#8090A0"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

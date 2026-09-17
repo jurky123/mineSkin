@@ -1,5 +1,6 @@
 package com.mineskin.integration;
 
+import com.google.gson.JsonObject;
 import com.mineui.api.MineUi;
 import com.mineui.api.MineUiProvider;
 import com.mineui.api.MineUiSession;
@@ -32,13 +33,13 @@ public final class MineUiIntegration implements UiAdapter {
     }
 
     @Override
-    public boolean hasClient(Player player) {
-        return api != null && api.hasClient(player);
+    public boolean supportsServerUi(Player player) {
+        return api != null && api.supportsServerUi(player);
     }
 
     @Override
-    public UiHandle open(Player player, String app, String view) {
-        return new SessionHandle(api.open(owner, player, app, view));
+    public UiHandle open(Player player, String app, String view, JsonObject definition) {
+        return new SessionHandle(api.open(owner, player, app, view, definition));
     }
 
     private static final class SessionHandle implements UiHandle {
@@ -57,7 +58,12 @@ public final class MineUiIntegration implements UiAdapter {
 
         @Override
         public UiHandle on(String actionId, UiActionHandler handler) {
-            session.on(actionId, action -> handler.handle(new UiAction(action.player(), action.id())));
+            session.on(actionId, action -> {
+                JsonObject payload = action.payload() != null && action.payload().isJsonObject()
+                        ? action.payload().getAsJsonObject()
+                        : new JsonObject();
+                handler.handle(new UiAction(action.player(), action.id(), payload));
+            });
             return this;
         }
 

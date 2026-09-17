@@ -155,7 +155,8 @@ commands:
     # This option will disable the /skins command from being registered on the server.
     # Do not disable this unless you are overriding the /skins command with a different plugin or you don't want the GUI command.
     # Requires a server restart to take effect.
-    disableGUICommand: false
+    # [MineSkin] /skins 由 MineSkin 接管（mod 客户端走 3D 预览，原版走聊天列表），故禁用 SR 自带 GUI 命令。
+    disableGUICommand: true
 
 # Control what skins appear in the /skins GUI
 gui:
