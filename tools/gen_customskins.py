@@ -26,7 +26,9 @@ for skin in data.get("skins", []):
     name = skin["skinId"].lower()
     payload = {
         "skinName": name,
-        "displayName": skin["skinName"],
+        # SkinsRestorer 的 displayName 需要是 JSON 组件字符串（与 convertPlainToJson 一致），
+        # 否则多词名字会让 /skins GUI 打开时报 MalformedJsonException
+        "displayName": json.dumps(skin["skinName"], ensure_ascii=False),
         "value": skin["value"],
         "signature": skin["signature"],
         "dataVersion": 1,

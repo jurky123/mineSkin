@@ -1,5 +1,6 @@
 package com.mineskin;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -61,7 +62,11 @@ public final class SkinCatalog {
         try {
             JsonObject json = JsonParser.parseString(Files.readString(file, StandardCharsets.UTF_8)).getAsJsonObject();
             String id = string(json, "skinName", fallbackId);
-            String display = string(json, "displayName", id);
+            if (id.startsWith("sr-recommendation-")) {
+                // SkinsRestorer 推荐皮肤的缓存副本，已在目录中对应正常皮肤
+                return null;
+            }
+            String display = decodeDisplay(string(json, "displayName", null), id);
             String value = string(json, "value", null);
             if (value == null || value.isEmpty()) {
                 plugin.getLogger().warning("皮肤文件缺少 value，已跳过: " + fileName);
@@ -73,6 +78,34 @@ public final class SkinCatalog {
             plugin.getLogger().warning("皮肤文件解析失败，已跳过: " + fileName + " (" + e.getMessage() + ")");
             return null;
         }
+    }
+
+    /**
+     * displayName 兼容两种格式：
+     * <ul>
+     *   <li>SkinsRestorer 规范格式：JSON 组件字符串（{@code "\"Chicken boss\""} 或 {@code {"text":"..."}}）</li>
+     *   <li>旧数据：纯文本（仅作兼容，多词会破坏 SR 自带 GUI）</li>
+     * </ul>
+     */
+    static String decodeDisplay(String raw, String fallback) {
+        if (raw == null || raw.isBlank()) {
+            return fallback;
+        }
+        String trimmed = raw.trim();
+        if (trimmed.startsWith("\"") || trimmed.startsWith("{")) {
+            try {
+                JsonElement parsed = JsonParser.parseString(trimmed);
+                if (parsed.isJsonPrimitive()) {
+                    return parsed.getAsString();
+                }
+                if (parsed.isJsonObject() && parsed.getAsJsonObject().has("text")) {
+                    return parsed.getAsJsonObject().get("text").getAsString();
+                }
+            } catch (JsonSyntaxException | IllegalStateException ignored) {
+                // 解析失败按纯文本处理
+            }
+        }
+        return raw;
     }
 
     private static String string(JsonObject json, String key, String fallback) {
