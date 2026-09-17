@@ -17,7 +17,7 @@ MINEUI_JAR=""
 if [ -d "$MINEUI_DIR" ]; then
     echo "==> 构建 MineUI"
     (cd "$MINEUI_DIR" && ./gradlew :mineui-paper:build :mineui-paper:publishToMavenLocal -q)
-    MINEUI_JAR=$(ls "$MINEUI_DIR"/mineui-paper/build/libs/MineUI-*.jar | head -n1)
+    MINEUI_JAR=$(ls -t "$MINEUI_DIR"/mineui-paper/build/libs/MineUI-*.jar | head -n1)
 else
     echo "警告：未找到 $MINEUI_DIR，跳过 MineUI 构建（3D 预览界面需要 MineUI）" >&2
 fi
@@ -25,7 +25,7 @@ fi
 # 2) 构建 MineSkin
 echo "==> 构建 MineSkin"
 (cd "$ROOT" && ./gradlew build -q)
-MINESKIN_JAR=$(ls "$ROOT"/build/libs/MineSkin-*.jar | head -n1)
+MINESKIN_JAR=$(ls -t "$ROOT"/build/libs/MineSkin-*.jar | head -n1)
 
 # 3) 部署服务端文件（皮肤目录/配置/Skript 脚本 + 插件 jar）
 mkdir -p "$SERVER/plugins/SkinsRestorer/skins" "$SERVER/plugins/Skript/scripts"
