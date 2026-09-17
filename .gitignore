@@ -1,2 +1,8 @@
+.gradle/
+build/
+run/
+*.iml
+.idea/
+.vscode/
 .DS_Store
 *.bak

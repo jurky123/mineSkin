@@ -1,0 +1,15 @@
+name: MineSkin
+version: '${version}'
+main: com.mineskin.MineSkinPlugin
+api-version: '26.2'
+description: 皮肤目录与 MineUI 3D 预览（换肤由 SkinsRestorer 提供）
+author: ubuntu
+depend: [SkinsRestorer]
+softdepend: [MineUI]
+permissions:
+  mineskin.use:
+    description: 允许使用 /skinui 浏览与换肤
+    default: true
+  mineskin.admin:
+    description: 允许 /skinui reload
+    default: op
