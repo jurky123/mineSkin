@@ -65,7 +65,7 @@ public final class SkinBrowser {
         pushPageLabel();
         pushStatus(results.isEmpty()
                 ? "试试 /skins <英文关键词>（如 fox、girl、creeper）"
-                : "悬停条目即时预览 · 点击选中后锁定预览 · 再点取消");
+                : "悬停预览 · 点击锁定/取消");
         ui.snapshot();
 
         player.sendMessage(net.kyori.adventure.text.Component.text(
@@ -91,10 +91,10 @@ public final class SkinBrowser {
         }
         if (selected == index) {
             selected = -1;
-            pushStatus("已取消选择，恢复悬停预览");
+            pushStatus("已取消选择");
         } else {
             selected = index;
-            pushStatus("已选择：" + results.get(index).display() + " · 点「应用该皮肤」生效（再次点击取消）");
+            pushStatus("已选择：" + shortName(results.get(index).display()));
         }
         pushSlots();
         pushPreview();
@@ -129,10 +129,10 @@ public final class SkinBrowser {
         try {
             plugin.applySkin(player, entry);
             plugin.markApplied(player);
-            pushStatus("已应用：" + entry.display() + "（/skin " + entry.id() + "）");
+            pushStatus("已应用：" + shortName(entry.display()));
         } catch (Exception e) {
             plugin.getLogger().warning("为 " + player.getName() + " 应用皮肤 " + entry.id() + " 失败: " + e.getMessage());
-            pushStatus("换肤失败：" + e.getMessage());
+            pushStatus("换肤失败");
         }
     }
 
@@ -151,11 +151,19 @@ public final class SkinBrowser {
             hovered = -1;
             pushSlots();
             pushPreview();
-            pushStatus("已清除皮肤，恢复默认外观");
+            pushStatus("已清除皮肤");
         } catch (Exception e) {
             plugin.getLogger().warning("为 " + player.getName() + " 清除皮肤失败: " + e.getMessage());
-            pushStatus("清除失败：" + e.getMessage());
+            pushStatus("清除失败");
         }
+    }
+
+    /** 状态栏较短，长名字截断显示。 */
+    private static String shortName(String name) {
+        if (name == null || name.length() <= 12) {
+            return name;
+        }
+        return name.substring(0, 11) + "…";
     }
 
     // ---------- 状态下发 ----------
@@ -176,6 +184,7 @@ public final class SkinBrowser {
         for (int i = 0; i < PAGE_SIZE; i++) {
             int index = page * PAGE_SIZE + i;
             Map<String, Object> slot = new LinkedHashMap<>();
+            slot.put("visible", index < results.size());
             if (index < results.size()) {
                 SkinEntry entry = results.get(index);
                 slot.put("name", entry.display());
@@ -219,7 +228,7 @@ public final class SkinBrowser {
         pushPreview();
         pushPageLabel();
         pushStatus(results.isEmpty()
-                ? "没有匹配「" + filter + "」的皮肤"
+                ? "没有匹配的皮肤"
                 : "找到 " + results.size() + " 款皮肤");
     }
 

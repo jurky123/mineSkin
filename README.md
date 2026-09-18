@@ -3,8 +3,8 @@
 换肤由 [SkinsRestorer](https://modrinth.com/plugin/skinsrestorer) 提供（皮肤存储、刷新、离线模式恢复），
 MineSkin 插件提供**唯一的皮肤入口 `/skins`**：中文皮肤目录 + 搜索 + 3D 预览。
 
-- **mod 客户端（MineUI 0.6.6+）**：`/skins` 打开 MineUI 3D 浏览器：
-  顶部居中搜索栏（回车搜索）、悬停条目即时 3D 预览、点击选中锁定（再点取消）、
+- **mod 客户端（MineUI 0.7.0+）**：`/skins` 打开 MineUI 3D 浏览器：
+  顶部居中搜索栏（回车搜索）、悬停条目即时 3D 预览（框内滚轮缩放）、点击选中锁定（再点取消）、
   右侧「应用该皮肤」立即换肤、「清除皮肤」恢复默认外观；翻页按钮在列表下方
 - **原版客户端 / 旧版 mod**：`/skins` 输出可点击的聊天列表（点击 `[换]` 换肤，支持关键词与翻页）；
   打开前检查客户端 `server_ui` 能力（`mineUi.supportsServerUi(player)`），不支持就回退
@@ -28,7 +28,7 @@ mineSkin/
 │   │   └── integration/               # MineUI API 实现（仅 API 可用时加载）
 │   └── main/resources/
 │       ├── plugin.yml
-│       └── assets/mineskin/ui/skin/browser.json  # 业务页面（随插件下发，MineUI 只渲染）
+│       └── assets/mineskin/ui/skin/browser.json  # 业务页面（原版风格 skin 预设，随插件下发）
 ├── config/config.yml         # SkinsRestorer 配置（中文化 + 冷却 5s + 禁用自带 GUI）
 ├── skins/*.customskin        # 内置皮肤（由推荐皮肤列表转换）
 ├── tools/gen_customskins.py  # 从 recommendations.json 重新生成皮肤文件
@@ -48,9 +48,12 @@ mineSkin/
 脚本会：构建 MineUI 并发布到本地 Maven（供本插件编译）→ 构建 MineSkin → 复制插件 jar、
 SkinsRestorer 配置/皮肤，并清理旧的 Skript 搜索脚本。部署后重启服务器。
 
-> 玩家客户端需要更新 MineUI mod（需要支持"服务端下发界面定义"的 0.6.6+，以及任意皮肤 3D 预览），
+> 玩家客户端需要更新 MineUI mod（需要支持"服务端下发界面定义"的 0.7.0+，以及任意皮肤 3D 预览），
 > 用 `../mineUI/tools/build_client_kit.sh` 打包分发。页面 JSON 现在随本插件 jar 发布
 > （`assets/mineskin/ui/skin/browser.json`），改界面不用重发 mod。
+
+> 页面使用 MineUI 0.6.7 的**原版风格模板**：按钮/输入框/滚动条用原版九宫格贴图
+> （`"skin": "vanilla:button"` / `vanilla:input` / `vanilla:panel`），改动时无需手写贴图。
 
 > 页面约束与本地调试：
 > - 定义随每次 `OPEN` 重发，单页建议 **≤24 KiB**（协议单包上限 32 KiB）；插件启动时会检查并告警

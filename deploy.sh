@@ -50,7 +50,7 @@ fi
 echo "  $SERVER/plugins/SkinsRestorer/config.yml（已禁用 SR 自带 /skins GUI）"
 echo "  $SERVER/plugins/SkinsRestorer/skins/  ($(ls "$ROOT"/skins/*.customskin | wc -l) 个皮肤)"
 echo
-echo "注意：玩家客户端需更新 MineUI mod（0.6.6+，支持服务端下发界面定义与任意皮肤 3D 预览；"
+echo "注意：玩家客户端需更新 MineUI mod（0.7.0+，支持服务端下发界面定义与任意皮肤 3D 预览；"
 echo "      页面本身随本插件 jar 发布，改界面不用重发 mod）："
 echo "  $MINEUI_DIR/tools/build_client_kit.sh"
 echo "重启服务器后生效；/skins 打开皮肤界面（mod 客户端 3D 预览，原版客户端聊天列表）。"
